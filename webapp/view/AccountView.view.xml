@@ -39,16 +39,14 @@
 					<DatePicker id="inputFiscalYear" value="" placeholder="e.g.2025" width="100%" displayFormat="yyyy" valueFormat="yyyy" change="onFiscalYearChange" />
 
 					<Label id="labelCurrency" required="true" text="Currency" />
-					<Input id="inputCurrency" 
-						value="{
+					<Input id="inputCurrency" value="{
 							parts: [
 								{path: 'oModel>/amount'},
 								{path: 'oModel>/currencyCode'}
 							],
 							type: 'sap.ui.model.type.Currency'
 							
-						}" 
-	   					showValueHelp="true" valueHelpRequest="onCurrencyValueHelpRequest" change="onCurrencyChange" />
+						}" showValueHelp="true" valueHelpRequest="onCurrencyValueHelpRequest" change="onCurrencyChange" />
 
 					<!-- Third Column -->
 					<core:Title id="sectionAdditionalInfo" class="hiddenTitle" />
@@ -69,7 +67,8 @@
 						<ToolbarSpacer />
 						<Button id="btnShowData" type="Ghost" text="Show Data" press="onShowData" />
 						<Button id="btnDownloadTemplate" type="Ghost" icon="sap-icon://download" text="Download Template" press="onDownloadTemplate" />
-						<Button id="btnUpload" type="Ghost" icon="sap-icon://upload" text="Upload" press="onUpload" />
+						<u:FileUploader id="fileUploader" fileType="xlsx" buttonText="Upload" icon="sap-icon://upload" iconOnly="false" buttonOnly="true" style="Emphasized" change="onFileChange" tooltip="Upload Excel File" />
+						<!-- <Button id="btnUpload" type="Ghost" icon="sap-icon://upload" text="Upload" press="onUploadPress" /> -->
 						<Button id="btnSimulation" type="Success" icon="sap-icon://validate" text="Simulation" press="onSimulation" />
 						<Button id="btnPost" type="Attention" icon="sap-icon://repost" text="Post" press="onPost" class="myAttentionBtn" />
 						<Button id="btnAdd" type="Emphasized" icon="sap-icon://add" text="Add" press="onAdd" />
