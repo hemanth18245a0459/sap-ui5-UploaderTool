@@ -50,7 +50,15 @@ sap.ui.define([
                 notifications: [],
                 notificationCount: 0,
                 tableKey: "",
-                currencyCode: "",
+                // currencyCode: "",
+                currencies: [
+                    { code: "USD" },
+                    { code: "EUR" },
+                    { code: "JPY" },
+                    { code: "GBP" },
+                    { code: "AUD" }
+                ],
+                selectedCurrency: "",
                 amount: 0
             };
 
@@ -201,78 +209,117 @@ sap.ui.define([
         //     this._oDialog.open();
         // },
 
-        onCurrencyValueHelpRequest: function () {
-            if (!this._oValueHelpDialog) {
-                Fragment.load({
-                    id: this.getView().getId(),
+        // onCurrencyValueHelpRequest: function () {
+        //     if (!this._oCurrencyValueHelpDialog) {
+        //         Fragment.load({
+        //             id: this.getView().getId(),
+        //             name: "y4cr2r020e249.fragment.CurrencyValueHelp",
+        //             controller: this
+        //         }).then(function (oDialog) {
+        //             this._oCurrencyValueHelpDialog = oDialog;
+        //             this.getView().addDependent(this._oCurrencyValueHelpDialog);
+        //             this._oCurrencyValueHelpDialog.open();
+        //         }.bind(this));
+        //     } else {
+        //         this._oCurrencyValueHelpDialog.open();
+        //     }
+        // },
+
+        // onCurrencyValueHelpCancel: function () {
+        //     this._oCurrencyValueHelpDialog.close();
+        // },
+
+        // onCurrencyListSelect: function (oEvent) {
+        //     var oSelectedItem = oEvent.getParameter("listItem");
+        //     var sCurrency = oSelectedItem.getTitle();
+        //     this.getView().getModel().setProperty("/selectedCurrency", sCurrency);
+        //     this._oCurrencyValueHelpDialog.close();
+        // },
+
+        onCurrencyValueHelpRequest: function (oEvent) {
+            var that = this;
+            var oView = this.getView();
+
+            if (!this._oCurrencyValueHelpDialog) {
+                this._oCurrencyValueHelpDialog = Fragment.load({
+                    id: oView.getId(),
                     name: "y4cr2r020e249.fragment.CurrencyValueHelp",
                     controller: this
-                }).then(function (oDialog) {
-                    this._oValueHelpDialog = oDialog;
-                    this.getView().addDependent(this._oValueHelpDialog);
-                    this._oValueHelpDialog.open();
-                }.bind(this));
-            } else {
-                this._oValueHelpDialog.open();
+                }).then(function (oCurrencyDialog) {
+                    oView.addDependent(oCurrencyDialog);
+                    this.getView().addDependent(this._oCurrencyValueHelpDialog);
+                    return oCurrencyDialog;
+                });
             }
+            this._oCurrencyValueHelpDialog.then(function(oCurrencyDialog){
+				oCurrencyDialog.open();
+			}.bind(this));
         },
 
-        onCurrencyValueHelpCancel: function () {
-            this._oValueHelpDialog.close();
+        onCurrencyhandleSearch: function (oEvent) {
+            var that = this;
+            var sValue = oEvent.getParameter("value");
+            var oBinding = oEvent.getParameter("itemsBinding");
+            if (!sValue) {
+                oBinding.filter([]);
+            } else {
+                var oFilter = new Filter("code", FilterOperator.Contains, sValue);
+                oBinding.filter([oFilter]);
+            }
         },
 
         onCurrencyListSelect: function (oEvent) {
             var oSelectedItem = oEvent.getParameter("listItem");
             var sCurrency = oSelectedItem.getTitle();
             this.getView().getModel().setProperty("/selectedCurrency", sCurrency);
-            this._oValueHelpDialog.close();
+            this._oCurrencyValueHelpDialog.close();
         },
 
-        onHeaderTextValueHelpRequest: function () {
-            var that = this;
-            // Only load data if it hasn't been loaded yet
-            var oTableModel = this.getView().getModel("oTableModel");
-            var aTerritoriesData = oTableModel.getProperty("/aTerritories");
+        // onHeaderTextValueHelpRequest: function () {
+        //     var that = this;
+        //     // Only load data if it hasn't been loaded yet
+        //     var oTableModel = this.getView().getModel("oTableModel");
+        //     var aTerritoriesData = oTableModel.getProperty("/aTerritories");
             
-            if (!this._oHeaderTextDialog) {
-                this._oHeaderTextDialog = sap.ui.xmlfragment("y4cr2r020e249.fragment.HeaderTextDialog", this);
-                this.getView().addDependent(this._oHeaderTextDialog);
+        //     if (!this._oHeaderTextDialog) {
+        //         this._oHeaderTextDialog = sap.ui.xmlfragment("y4cr2r020e249.fragment.HeaderTextDialog", this);
+        //         this.getView().addDependent(this._oHeaderTextDialog);
                 
-                this._oHeaderTextDialog.attachSearch(this.onHeaderTextSearchFilter, this);
-                this._oHeaderTextDialog.attachLiveChange(this.onHeaderTextSearchFilter, this);
-            }
+        //         this._oHeaderTextDialog.attachSearch(this.onHeaderTextSearchFilter, this);
+        //         this._oHeaderTextDialog.attachLiveChange(this.onHeaderTextSearchFilter, this);
+        //     }
             
-            if (!aTerritoriesData || aTerritoriesData.length === 0) {
-                sap.ui.core.BusyIndicator.show(0);
-                var oModel = this.getView().getModel("oModel");
-                var oParams = "TerritoryDescription"
+        //     if (!aTerritoriesData || aTerritoriesData.length === 0) {
+        //         sap.ui.core.BusyIndicator.show(0);
+        //         var oModel = this.getView().getModel("oModel");
+        //         var oParams = "TerritoryDescription"
                 
-                oModel.read("/Territories", {
-                    urlParameters: oParams,
-                    success: function (oData) {
-                        sap.ui.core.BusyIndicator.hide();
-                        oTableModel.setProperty("/aTerritories", oData.results);
-                        that._oHeaderTextDialog.open();
-                    },
-                    error: function (oError) {
-                        sap.ui.core.BusyIndicator.hide();
-                        console.error("Error reading data:", oError);
-                        // Show error message to user
-                        sap.m.MessageToast.show("Error loading company data");
-                    }
-                });
-            } else {
-                this._oHeaderTextDialog.open();
-            }
+        //         oModel.read("/Territories", {
+        //             urlParameters: oParams,
+        //             success: function (oData) {
+        //                 sap.ui.core.BusyIndicator.hide();
+        //                 oTableModel.setProperty("/aTerritories", oData.results);
+        //                 that._oHeaderTextDialog.open();
+        //             },
+        //             error: function (oError) {
+        //                 sap.ui.core.BusyIndicator.hide();
+        //                 console.error("Error reading data:", oError);
+        //                 // Show error message to user
+        //                 sap.m.MessageToast.show("Error loading company data");
+        //             }
+        //         });
+        //     } else {
+        //         this._oHeaderTextDialog.open();
+        //     }
 
-        },
+        // },
 
         onHeaderTextValueHelpRequest: function(oEvent) {
             var that = this;
             var oView = this.getView();
 
-			if (!this._pValueHelpDialog) {
-				this._pValueHelpDialog = Fragment.load({
+			if (!this._pHeaderTextValueHelpDialog) {
+				this._pHeaderTextValueHelpDialog = Fragment.load({
 					id: oView.getId(),
 					name: "y4cr2r020e249.fragment.HeaderTextDialog",
 					controller: this
@@ -281,7 +328,7 @@ sap.ui.define([
 					return oValueHelpDialog;
 				});
 			}
-			this._pValueHelpDialog.then(function(oValueHelpDialog){
+			this._pHeaderTextValueHelpDialog.then(function(oValueHelpDialog){
 				oValueHelpDialog.open();
 			}.bind(this));
         },
@@ -359,8 +406,8 @@ sap.ui.define([
             var that = this;
             var oView = this.getView();
 
-			if (!this._pValueHelpDialog) {
-				this._pValueHelpDialog = Fragment.load({
+			if (!this._pReferenceValueHelpDialog) {
+				this._pReferenceValueHelpDialog = Fragment.load({
 					id: oView.getId(),
 					name: "y4cr2r020e249.fragment.ReferenceDiaglog",
 					controller: this
@@ -369,7 +416,7 @@ sap.ui.define([
 					return oValueHelpDialog;
 				});
 			}
-			this._pValueHelpDialog.then(function(oValueHelpDialog){
+			this._pReferenceValueHelpDialog.then(function(oValueHelpDialog){
 				oValueHelpDialog.open();
 			}.bind(this));
         },
@@ -395,7 +442,7 @@ sap.ui.define([
 				// oInput.resetProperty("value");
 				return;
 			}
-			oInput.setValue(oSelectedItem.getCells()[0].getText().trim());
+			oInput.setValue(oSelectedItem.getTitle().trim());
         },
 
         onShowData: function() {
